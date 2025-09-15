@@ -49,6 +49,7 @@ class Settings(BaseSettings):
         populate_by_name=True
     )
     db: DataBaseSettings
+    api_keys: APIKeys
 
 
 
