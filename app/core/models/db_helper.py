@@ -2,7 +2,7 @@ from contextlib import contextmanager
 
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.exc import IntegrityError
+
 
 from core.config import settings
 
