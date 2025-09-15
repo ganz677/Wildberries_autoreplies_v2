@@ -9,7 +9,7 @@ from typing import (
     Any,
 )
 
-from app.core.config import settings
+from core.config import settings
 from .interfaces import (
     IApiClient,
     RequestsClient,
