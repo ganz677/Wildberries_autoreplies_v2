@@ -31,7 +31,6 @@ class DataBaseSettings(BaseModel):
     port: int
     db_name: str
     pool_pre_ping: bool
-    future: bool
 
     @property
     def url(self):
@@ -50,7 +49,7 @@ class Settings(BaseSettings):
     )
     db: DataBaseSettings
     api_keys: APIKeys
-
+    logging: LoggingSettings = LoggingSettings()
 
 
 settings = Settings()
