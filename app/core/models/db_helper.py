@@ -2,6 +2,7 @@ from contextlib import contextmanager
 
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.exc import IntegrityError
 
 from core.config import settings
 
@@ -28,8 +29,19 @@ class DataBaseHelper:
         with self.session_factory() as session:
             yield session
 
+    @contextmanager
+    def session_scope(self) -> Session:
+        with self.get_session() as session:
+            try:
+                yield session
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+
     def dispose(self):
         self.engine.dispose()
+
 
 
 db_helper = DataBaseHelper(
