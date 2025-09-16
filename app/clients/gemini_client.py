@@ -12,12 +12,12 @@ class GeminiClient:
     def __init__(
             self,
             api_key: str | None = None,
-            model: str = 'gemini-1.5-flash',
+            model_name: str = 'gemini-1.5-flash',
     ) -> None:
         self.api_key = api_key or settings.api_keys.gemini_token
         if not self.api_key:
             raise RuntimeError('Gemini token is missing (settings.api_keys.gemini_token)')
-        self.model = model
+        self.model_name = model_name
         self.client = genai.Client(api_key=self.api_key)
 
     def generate(self, prompt: str) -> str:
@@ -25,7 +25,7 @@ class GeminiClient:
         Send a text request to Gemini and return the response as a string
         '''
         response = self.client.models.generate_content(
-            model=self.model,
+            model=self.model_name,
             contents=prompt,
         )
         try:
