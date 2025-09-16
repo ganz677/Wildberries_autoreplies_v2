@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from venv import create
-
-from clients.gemini_client import GeminiClient
+from clients import GeminiClient
 from core.models import (
     db_helper,
     Review,

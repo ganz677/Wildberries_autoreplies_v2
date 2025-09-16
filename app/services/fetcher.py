@@ -7,7 +7,7 @@ from typing import (
 )
 from sqlalchemy import select
 
-from clients.wb_client import WBClient
+from clients import WBClient
 from core.models import (
     db_helper,
     Review
