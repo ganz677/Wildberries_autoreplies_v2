@@ -7,8 +7,8 @@ from typing import Iterable
 
 from sqlalchemy import select
 
-from clients import WBClient
-from core.models import (
+from app.clients import WBClient
+from app.core.models import (
     db_helper,
     Review,
     Response

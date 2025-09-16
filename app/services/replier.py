@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from clients import GeminiClient
-from core.models import (
+from app.clients import GeminiClient
+from app.core.models import (
     db_helper,
     Review,
     Response
