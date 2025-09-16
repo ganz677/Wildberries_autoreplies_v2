@@ -22,14 +22,14 @@ class GenerateRepliesService:
         self.gem = gemini or GeminiClient(model_name=model_name)
 
     @staticmethod
-    def _built_prompt(
+    def _build_prompt(
             text: str | None,
             rating: int | None,
     ) -> str:
         base = 'Ты — поддержка бренда. Пиши очень кратко (2–4 предложения), дружелюбно, без спама.'
         base += f'Покупатель оценил товар: {rating or 0}/5. '
         if (text or '').strip():
-            base += f'Отзыв: "{(text or '').strip()}". '
+            base += f'Отзыв: "{(text or "").strip()}". '
         else:
             base += 'Покупатель оставил только оценку без текста.'
 
