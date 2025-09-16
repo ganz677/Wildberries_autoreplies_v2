@@ -55,7 +55,15 @@ class GenerateRepliesService:
             )
 
             for r in reviews:
-                prompt = self._built_prompt(
+                existing = (
+                    session.query(Response.id)
+                    .filter(Response.review_id == r.id)
+                    .first()
+                )
+                if existing:
+                    continue
+
+                prompt = self._build_prompt(
                     r.text,
                     r.rating,
                 )
