@@ -85,7 +85,7 @@ class IReviewApi(ABC):
             is_answered: bool,
             date_from: Optional[int] = None,
             date_to: Optional[int] = None,
-            order: str = 'dataDesc',
+            order: str = 'dateDesc',
             page_size: int = 1000,
             max_total: int = 10000,
             nm_id: Optional[int] = None,
