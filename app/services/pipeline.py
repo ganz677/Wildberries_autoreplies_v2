@@ -1,9 +1,8 @@
 from app.core.logger import logger
-from . import (
-    FetchNewReviewsService,
-    PublishRepliesService,
-    GenerateRepliesService,
-)
+
+from .fetcher import FetchNewReviewsService
+from .publisher import PublishRepliesService
+from .replier import GenerateRepliesService
 
 
 class ReviewsPipeline:
@@ -20,22 +19,22 @@ class ReviewsPipeline:
         self.replier = GenerateRepliesService()
 
     def run(self) -> dict[str, int]:
-        logger.info("🚀 Starting reviews pipeline")
+        logger.info('🚀 Starting reviews pipeline')
 
         created_reviews = self.fetcher.execute()
-        logger.info("Step 1 finished: fetched %s new reviews", created_reviews)
+        logger.info('Step 1 finished: fetched %s new reviews', created_reviews)
 
         drafted_responses = self.replier.execute()
-        logger.info("Step 2 finished: drafted %s responses", drafted_responses)
+        logger.info('Step 2 finished: drafted %s responses', drafted_responses)
 
         published_responses = self.publisher.execute()
-        logger.info("Step 3 finished: published %s responses", published_responses)
+        logger.info('Step 3 finished: published %s responses', published_responses)
 
         summary = {
-            "fetched_reviews": created_reviews,
-            "drafted_responses": drafted_responses,
-            "published_responses": published_responses,
+            'fetched_reviews': created_reviews,
+            'drafted_responses': drafted_responses,
+            'published_responses': published_responses,
         }
 
-        logger.info("Pipeline finished: %s", summary)
+        logger.info('Pipeline finished: %s', summary)
         return summary

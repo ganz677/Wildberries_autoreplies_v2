@@ -1,7 +1,6 @@
-from .services import ReviewsPipline
-
+from .services import ReviewsPipeline
 
 if __name__ == '__main__':
-    pipeline = ReviewsPipline()
+    pipeline = ReviewsPipeline()
     result = pipeline.run()
     print(f'Pipeline finished: {result}')

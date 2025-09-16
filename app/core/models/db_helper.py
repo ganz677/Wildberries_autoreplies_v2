@@ -1,18 +1,17 @@
+from collections.abc import Iterator
 from contextlib import contextmanager
 
-from sqlalchemy import create_engine, Engine
-from sqlalchemy.orm import sessionmaker, Session
-
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
 
 
-
 class DataBaseHelper:
     def __init__(
-            self,
-            url: str,
-            pool_pre_ping: bool,
+        self,
+        url: str,
+        pool_pre_ping: bool,
     ):
         self.engine: Engine = create_engine(
             url=url,
@@ -25,12 +24,12 @@ class DataBaseHelper:
         )
 
     @contextmanager
-    def get_session(self) -> Session:
+    def get_session(self) -> Iterator[Session]:
         with self.session_factory() as session:
             yield session
 
     @contextmanager
-    def session_scope(self) -> Session:
+    def session_scope(self) -> Iterator[Session]:
         with self.get_session() as session:
             try:
                 yield session
@@ -41,7 +40,6 @@ class DataBaseHelper:
 
     def dispose(self):
         self.engine.dispose()
-
 
 
 db_helper = DataBaseHelper(

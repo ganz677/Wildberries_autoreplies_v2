@@ -1,6 +1,7 @@
-from app.services import FetchNewReviewsService
-from app.core.models import Review
 from sqlalchemy import select
+
+from app.core.models import Review
+from app.services import FetchNewReviewsService
 
 
 def test_fetcher_inserts_review(db, fake_wb):

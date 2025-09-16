@@ -11,7 +11,7 @@ def camel_to_snake_case(tablename: str) -> str:
             if prev_char.isupper() and flag:
                 pass
             else:
-                chars.append("_")
+                chars.append('_')
         chars.append(char)
 
-    return "".join(chars)
+    return ''.join(chars)

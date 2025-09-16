@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import datetime
-from typing import Optional
+
 from sqlalchemy import select
 
-from app.core.logger import logger
 from app.clients import WBClient
+from app.core.logger import logger
 from app.core.models import (
-    db_helper,
     Review,
+    db_helper,
 )
 
 
@@ -25,15 +25,15 @@ class FetchNewReviewsService:
     @staticmethod
     def _to_unix(dt: datetime.datetime) -> int:
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=datetime.timezone.utc)
+            dt = dt.replace(tzinfo=datetime.UTC)
         return int(dt.timestamp())
 
     @staticmethod
-    def _parse_wb_iso(s: Optional[str]) -> datetime.datetime:
+    def _parse_wb_iso(s: str | None) -> datetime.datetime:
         # WB: "2024-09-26T10:20:48+03:00"
         if not s:
-            return datetime.datetime.now(datetime.timezone.utc)
-        return datetime.datetime.fromisoformat(s).astimezone(datetime.timezone.utc)
+            return datetime.datetime.now(datetime.UTC)
+        return datetime.datetime.fromisoformat(s).astimezone(datetime.UTC)
 
     def execute(
         self,
@@ -41,18 +41,18 @@ class FetchNewReviewsService:
         window_days: int = 3,
         page_size: int = 1000,
         max_total: int = 10000,
-        order: str = "dateDesc",
+        order: str = 'dateDesc',
         nm_id: int | None = None,
     ) -> int:
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = datetime.datetime.now(datetime.UTC)
         date_from = self._to_unix(now - datetime.timedelta(days=window_days))
         date_to = self._to_unix(now)
 
         logger.info(
-            "Fetching WB reviews: window=%sdays, from=%s to=%s, page_size=%s, max_total=%s",
+            'Fetching WB reviews: window=%sdays, from=%s to=%s, page_size=%s, max_total=%s',
             window_days,
-            datetime.datetime.fromtimestamp(date_from, tz=datetime.timezone.utc),
-            datetime.datetime.fromtimestamp(date_to, tz=datetime.timezone.utc),
+            datetime.datetime.fromtimestamp(date_from, tz=datetime.UTC),
+            datetime.datetime.fromtimestamp(date_to, tz=datetime.UTC),
             page_size,
             max_total,
         )
@@ -68,35 +68,35 @@ class FetchNewReviewsService:
                 max_total=max_total,
                 nm_id=nm_id,
             ):
-                wb_id = (str(item.get("id") or "").strip())
+                wb_id = str(item.get('id') or '').strip()
                 if not wb_id:
-                    logger.warning("Skipping feedback without id: %s", item)
+                    logger.warning('Skipping feedback without id: %s', item)
                     continue
 
                 exists = session.execute(
                     select(Review.id).where(Review.wb_id == wb_id)
                 ).scalar_one_or_none()
                 if exists:
-                    logger.debug("Feedback %s already exists, skipping", wb_id)
+                    logger.debug('Feedback %s already exists, skipping', wb_id)
                     continue
 
                 # sku -> productDetails.nmId
-                pd = item.get("productDetails") or {}
-                nm = pd.get("nmId")
+                pd = item.get('productDetails') or {}
+                nm = pd.get('nmId')
                 sku = str(nm) if nm is not None else None
 
                 review = Review(
                     wb_id=wb_id,
-                    user_name=item.get("userName"),
-                    text=item.get("text"),
-                    rating=item.get("productValuation"),
+                    user_name=item.get('userName'),
+                    text=item.get('text'),
+                    rating=item.get('productValuation'),
                     sku=sku,
-                    created_at=self._parse_wb_iso(item.get("createdDate")),
-                    status="new",
+                    created_at=self._parse_wb_iso(item.get('createdDate')),
+                    status='new',
                 )
                 session.add(review)
                 created += 1
-                logger.info("Inserted new review wb_id=%s, rating=%s", wb_id, review.rating)
+                logger.info('Inserted new review wb_id=%s, rating=%s', wb_id, review.rating)
 
-        logger.info("Total inserted reviews: %s", created)
+        logger.info('Total inserted reviews: %s', created)
         return created

@@ -1,14 +1,7 @@
 import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from sqlalchemy import (
-    String,
-    Text,
-    Integer,
-    DateTime,
-    ForeignKey,
-    func
-)
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -33,9 +26,7 @@ class Response(Base):
         index=True,
     )
     reply_text: Mapped[str] = mapped_column(
-        Text,
-        nullable=False,
-        doc='финальный текст ответа на отзыв'
+        Text, nullable=False, doc='финальный текст ответа на отзыв'
     )
     model: Mapped[str] = mapped_column(
         String(64),
@@ -45,7 +36,7 @@ class Response(Base):
     status: Mapped[str] = mapped_column(
         String(16),
         nullable=False,
-        default='draft', # draft->published->failed
+        default='draft',  # draft->published->failed
         index=True,
     )
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -53,7 +44,7 @@ class Response(Base):
         nullable=False,
         server_default=func.now(),
     )
-    published_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+    published_at: Mapped[datetime.datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
     )

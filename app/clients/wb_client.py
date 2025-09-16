@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import time
-from typing import Iterator, Optional, Dict, Any
+from collections.abc import Iterator
+from typing import Any
 
 from app.core.config import settings
 from app.core.logger import logger
-from .interfaces import IApiClient, RequestsClient, IReviewApi
+
+from .interfaces import IApiClient, IReviewApi, RequestsClient
 
 
 class WBClient(IReviewApi):
@@ -15,7 +17,7 @@ class WBClient(IReviewApi):
     - Generator list_feedbacks page by page and carefully to rate limit WB (~3 rps, burst ~6)
     """
 
-    BASE_URL = "https://feedbacks-api.wildberries.ru"
+    BASE_URL = 'https://feedbacks-api.wildberries.ru'
 
     def __init__(
         self,
@@ -26,32 +28,32 @@ class WBClient(IReviewApi):
         self.token = token
         self.transport = transport
         self.timeout = timeout
-        logger.info("WBClient initialized with timeout=%s", timeout)
+        logger.info('WBClient initialized with timeout=%s', timeout)
 
     @classmethod
-    def create(cls) -> "WBClient":
+    def create(cls) -> WBClient:
         token = settings.api_keys.wb_token
         if not token:
-            raise RuntimeError("WB Token is missing (settings.api_keys.wb_token)")
-        logger.info("Creating WBClient with token from settings")
+            raise RuntimeError('WB Token is missing (settings.api_keys.wb_token)')
+        logger.info('Creating WBClient with token from settings')
         return cls(token=token, transport=RequestsClient())
 
     def _headers(self) -> dict[str, str]:
         return {
-            "Authorization": self.token,
-            "Content-Type": "application/json",
+            'Authorization': self.token,
+            'Content-Type': 'application/json',
         }
 
     def list_feedbacks(
         self,
         *,
         is_answered: bool,
-        date_from: Optional[int] = None,
-        date_to: Optional[int] = None,
-        order: str = "dateDesc",
+        date_from: int | None = None,
+        date_to: int | None = None,
+        order: str = 'dateDesc',
         page_size: int = 1000,
         max_total: int = 10000,
-        nm_id: Optional[int] = None,
+        nm_id: int | None = None,
         sleep_between_pages: float = 0.2,
     ) -> Iterator[dict]:
         """
@@ -61,10 +63,10 @@ class WBClient(IReviewApi):
         - Supported: order, dateFrom, dateTo, nmId.
         """
         if not (1 <= page_size <= 5000):
-            raise ValueError("Page size must be between 1 and 5000.")
+            raise ValueError('Page size must be between 1 and 5000.')
 
         logger.info(
-            "Fetching WB feedbacks: answered=%s, page_size=%s, max_total=%s, nm_id=%s",
+            'Fetching WB feedbacks: answered=%s, page_size=%s, max_total=%s, nm_id=%s',
             is_answered,
             page_size,
             max_total,
@@ -76,22 +78,22 @@ class WBClient(IReviewApi):
 
         while taken < max_total:
             take = min(page_size, max_total - taken)
-            params: Dict[str, Any] = {
-                "isAnswered": str(is_answered).lower(),
-                "take": take,
-                "skip": skip,
-                "order": order,
+            params: dict[str, Any] = {
+                'isAnswered': str(is_answered).lower(),
+                'take': take,
+                'skip': skip,
+                'order': order,
             }
 
             if date_from is not None:
-                params["dateFrom"] = int(date_from)
+                params['dateFrom'] = int(date_from)
             if date_to is not None:
-                params["dateTo"] = int(date_to)
+                params['dateTo'] = int(date_to)
             if nm_id is not None:
-                params["nmId"] = int(nm_id)
+                params['nmId'] = int(nm_id)
 
-            url = f"{self.BASE_URL}/api/v1/feedbacks"
-            logger.debug("Requesting %s with params=%s", url, params)
+            url = f'{self.BASE_URL}/api/v1/feedbacks'
+            logger.debug('Requesting %s with params=%s', url, params)
 
             payload = self.transport.get(
                 url,
@@ -99,18 +101,15 @@ class WBClient(IReviewApi):
                 params=params,
                 timeout=self.timeout,
             )
-            items = (payload.get("data") or {}).get("feedbacks") or []
+            items = (payload.get('data') or {}).get('feedbacks') or []
 
             if not items:
-                logger.info("No more feedbacks found (skip=%s, taken=%s)", skip, taken)
+                logger.info('No more feedbacks found (skip=%s, taken=%s)', skip, taken)
                 break
 
-            logger.info(
-                "Fetched %s feedbacks (skip=%s, taken=%s)", len(items), skip, taken
-            )
+            logger.info('Fetched %s feedbacks (skip=%s, taken=%s)', len(items), skip, taken)
 
-            for item in items:
-                yield item
+            yield from items
 
             count = len(items)
             taken += count
@@ -119,7 +118,7 @@ class WBClient(IReviewApi):
             if sleep_between_pages:
                 time.sleep(sleep_between_pages)
 
-        logger.info("Finished fetching feedbacks, total=%s", taken)
+        logger.info('Finished fetching feedbacks, total=%s', taken)
 
     def reply_to_feedback(
         self,
@@ -131,13 +130,13 @@ class WBClient(IReviewApi):
         Body: {"id": "<feedback_id>", "text": "<answer_text>"}
         Success: 204 No Content (sometimes 200 OK).
         """
-        url = f"{self.BASE_URL}/api/v1/feedbacks/answer"
+        url = f'{self.BASE_URL}/api/v1/feedbacks/answer'
         payload = {
-            "id": str(feedback_id),
-            "text": text,
+            'id': str(feedback_id),
+            'text': text,
         }
 
-        logger.info("Replying to feedback %s with text=%s", feedback_id, text[:100])
+        logger.info('Replying to feedback %s with text=%s', feedback_id, text[:100])
 
         self.transport.post(
             url=url,
@@ -146,4 +145,4 @@ class WBClient(IReviewApi):
             timeout=self.timeout,
         )
 
-        logger.debug("Reply successfully sent to feedback %s", feedback_id)
+        logger.debug('Reply successfully sent to feedback %s', feedback_id)

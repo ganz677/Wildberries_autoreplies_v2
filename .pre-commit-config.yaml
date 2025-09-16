@@ -10,6 +10,7 @@ repos:
     rev: v1.11.2
     hooks:
       - id: mypy
+        args: ['--install-types', '--non-interactive']
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
