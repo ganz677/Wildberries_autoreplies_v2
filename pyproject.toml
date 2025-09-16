@@ -9,11 +9,66 @@ dependencies = [
     "apscheduler>=3.11.0",
     "black>=25.1.0",
     "google-genai>=1.36.0",
+    "mypy>=1.18.1",
+    "pre-commit>=4.3.0",
     "psycopg>=3.2.10",
     "pydantic>=2.11.9",
     "pydantic-settings>=2.10.1",
     "pytest>=8.4.2",
     "python-dotenv>=1.1.1",
     "requests>=2.32.5",
+    "ruff>=0.13.0",
     "sqlalchemy>=2.0.43",
+    "types-requests>=2.32.4.20250913",
 ]
+
+[dependency-groups]
+dev = [
+  "ruff>=0.6.9",
+  "mypy>=1.11",
+  "pytest>=8.4",
+  "coverage>=7.6",
+  "pre-commit>=3.8",
+  "types-requests>=2.32.4.20250913",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+respect-gitignore = true
+exclude = ["alembic/versions", ".venv"]
+
+[tool.ruff.lint]
+select = ["E","F","I","UP","B","C4","SIM","ARG","RET","RUF"]
+ignore = ["E203"]
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.13"
+strict = false
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+exclude = ["alembic/versions"]
+
+[tool.pytest.ini_options]
+addopts = "-q --maxfail=1 --disable-warnings"
+testpaths = ["tests"]
+pythonpath = ["."]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+omit = ["app/__init__.py", "app/core/__init__.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 80
