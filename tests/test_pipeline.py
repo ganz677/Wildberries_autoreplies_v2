@@ -1,4 +1,4 @@
-from app.services import ReviewsPipline
+from app.services import ReviewsPipeline
 
 
 def test_pipeline_end_to_end(
@@ -7,7 +7,7 @@ def test_pipeline_end_to_end(
         fake_gemini,
         monkeypatch,
 ):
-    pipeline = ReviewsPipline()
+    pipeline = ReviewsPipeline()
     pipeline.fetcher.wb_client = fake_wb
     pipeline.replier.gem = fake_gemini
     pipeline.publisher.wb = fake_wb
